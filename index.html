@@ -2,13 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Chess Game - Web Version</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Professional Chess Game</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
         body {
@@ -18,7 +22,22 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 10px;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+
+        .game-wrapper {
+            width: 100%;
+            height: 100%;
+            max-width: 1400px;
+            max-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
         }
 
         .game-container {
@@ -26,15 +45,65 @@
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             display: flex;
-            gap: 30px;
-            padding: 30px;
-            max-width: 1200px;
+            gap: 20px;
+            padding: 20px;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Desktop Layout */
+        @media (min-width: 800px) {
+            .game-container {
+                flex-direction: row;
+                max-width: 1200px;
+                max-height: 90vh;
+            }
+            
+            .board-section {
+                flex: 0 0 auto;
+            }
+            
+            .sidebar {
+                flex: 1;
+                min-width: 300px;
+                overflow-y: auto;
+            }
+        }
+
+        /* Mobile Layout */
+        @media (max-width: 799px) {
+            .game-container {
+                flex-direction: column;
+                align-items: center;
+                padding: 10px;
+            }
+            
+            .board-section {
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                flex-shrink: 0;
+            }
+            
+            .sidebar {
+                width: 100%;
+                max-width: 400px;
+                overflow-y: auto;
+                flex: 1;
+            }
         }
 
         .board-section {
             display: flex;
             flex-direction: column;
             align-items: center;
+            position: relative;
+        }
+
+        .board-wrapper {
+            position: relative;
+            touch-action: none;
         }
 
         #chessboard {
@@ -42,37 +111,40 @@
             border-radius: 8px;
             cursor: pointer;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+            background: #f0d9b5;
+            display: block;
         }
 
         .sidebar {
-            width: 300px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 15px;
         }
 
         .panel {
             background: #f8f9fa;
             border-radius: 10px;
-            padding: 20px;
+            padding: 15px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
         }
 
         .panel h3 {
             color: #333;
-            margin-bottom: 15px;
-            font-size: 18px;
+            margin-bottom: 10px;
+            font-size: 16px;
             border-bottom: 2px solid #667eea;
-            padding-bottom: 8px;
+            padding-bottom: 5px;
         }
 
         .turn-indicator {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: bold;
             text-align: center;
-            padding: 15px;
+            padding: 12px;
             border-radius: 8px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             transition: all 0.3s ease;
         }
 
@@ -90,11 +162,11 @@
 
         .status {
             text-align: center;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: bold;
-            padding: 10px;
+            padding: 8px;
             border-radius: 8px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         .status.check {
@@ -127,49 +199,57 @@
         .captured-pieces {
             display: flex;
             flex-wrap: wrap;
-            gap: 5px;
-            min-height: 40px;
-            padding: 10px;
+            gap: 3px;
+            min-height: 30px;
+            padding: 8px;
             background: white;
             border-radius: 5px;
-            font-size: 28px;
+            font-size: 24px;
+            align-items: center;
         }
 
         .move-history {
-            max-height: 200px;
+            max-height: 150px;
             overflow-y: auto;
             background: white;
             border-radius: 5px;
-            padding: 10px;
+            padding: 8px;
         }
 
         .move-item {
-            padding: 5px;
-            margin: 2px 0;
+            padding: 3px;
+            margin: 1px 0;
             background: #f0f0f0;
             border-radius: 3px;
             font-family: monospace;
-            font-size: 14px;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
         }
 
         .controls {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        @media (max-width: 799px) {
+            .controls {
+                grid-template-columns: 1fr;
+            }
         }
 
         button {
-            flex: 1;
-            padding: 12px 20px;
+            padding: 10px 15px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: bold;
             transition: all 0.3s ease;
-            min-width: 100px;
+            touch-action: manipulation;
         }
 
         button:hover {
@@ -179,6 +259,11 @@
 
         button:active {
             transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .promotion-dialog {
@@ -192,6 +277,7 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
+            touch-action: none;
         }
 
         .promotion-dialog.active {
@@ -203,6 +289,9 @@
             padding: 30px;
             border-radius: 15px;
             text-align: center;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow: auto;
         }
 
         .promotion-content h3 {
@@ -212,8 +301,9 @@
 
         .promotion-pieces {
             display: flex;
-            gap: 20px;
+            gap: 15px;
             justify-content: center;
+            flex-wrap: wrap;
         }
 
         .promotion-piece {
@@ -222,64 +312,240 @@
             padding: 10px;
             border-radius: 8px;
             transition: all 0.3s ease;
+            border: 2px solid transparent;
+            touch-action: manipulation;
         }
 
         .promotion-piece:hover {
             background: #f0f0f0;
             transform: scale(1.2);
+            border-color: #667eea;
+        }
+
+        .game-mode {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 8px;
+            background: #e0e0e0;
+            border: 2px solid transparent;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            touch-action: manipulation;
+        }
+
+        .mode-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #764ba2;
+        }
+
+        .thinking-indicator {
+            text-align: center;
+            padding: 10px;
+            background: #fff3cd;
+            border-radius: 5px;
+            color: #856404;
+            font-weight: bold;
+            display: none;
+        }
+
+        .thinking-indicator.active {
+            display: block;
+            animation: pulse 1.5s infinite;
+        }
+
+        .piece {
+            position: absolute;
+            cursor: grab;
+            transition: none;
+            z-index: 10;
+            pointer-events: none;
+            will-change: transform;
+            touch-action: none;
+        }
+
+        .piece.dragging {
+            z-index: 1000;
+            transform: scale(1.1);
+            filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.3));
+            cursor: grabbing;
+            transition: transform 0.1s ease;
+        }
+
+        .piece.animating {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+        }
+
+        .square-highlight {
+            position: absolute;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .valid-move {
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, rgba(0, 255, 0, 0.5) 0%, rgba(0, 255, 0, 0.2) 70%);
+            border-radius: 50%;
+            position: absolute;
+            pointer-events: none;
+            z-index: 6;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .capture-move {
+            width: 100%;
+            height: 100%;
+            border: 3px solid rgba(255, 0, 0, 0.5);
+            border-radius: 4px;
+            position: absolute;
+            pointer-events: none;
+            z-index: 6;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
         }
 
         .coordinates {
             position: absolute;
-            font-size: 12px;
+            font-size: 10px;
             color: #666;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @media (max-width: 799px) {
+            .coordinates {
+                font-size: 8px;
+            }
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 8px;
+            background: white;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .score-display {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
             font-weight: bold;
         }
 
-        .rank-label {
-            left: 5px;
+        .drag-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 999;
+            pointer-events: none;
         }
 
-        .file-label {
-            bottom: 5px;
-            right: 5px;
+        .drag-overlay.active {
+            pointer-events: all;
+        }
+
+        .ai-difficulty {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .difficulty-btn {
+            flex: 1;
+            padding: 5px;
+            font-size: 12px;
+            background: #e0e0e0;
+            border: 1px solid transparent;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .difficulty-btn.active {
+            background: #667eea;
+            color: white;
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <div class="board-section">
-            <canvas id="chessboard" width="640" height="640"></canvas>
-        </div>
-        
-        <div class="sidebar">
-            <div class="panel">
-                <div id="turnIndicator" class="turn-indicator white">White's Turn</div>
-                <div id="gameStatus" class="status normal">Game in Progress</div>
-            </div>
-
-            <div class="panel">
-                <h3>Captured Pieces</h3>
-                <div>
-                    <p style="margin-bottom: 5px;">By White:</p>
-                    <div id="capturedByWhite" class="captured-pieces"></div>
-                </div>
-                <div style="margin-top: 10px;">
-                    <p style="margin-bottom: 5px;">By Black:</p>
-                    <div id="capturedByBlack" class="captured-pieces"></div>
+    <div class="drag-overlay" id="dragOverlay"></div>
+    <div class="game-wrapper">
+        <div class="game-container">
+            <div class="board-section">
+                <div class="board-wrapper">
+                    <canvas id="chessboard"></canvas>
+                    <div id="piecesContainer"></div>
                 </div>
             </div>
+            
+            <div class="sidebar">
+                <div class="panel">
+                    <div class="game-mode">
+                        <button class="mode-btn active" onclick="game.setGameMode('pvp')">Player vs Player</button>
+                        <button class="mode-btn" onclick="game.setGameMode('ai')">Player vs AI</button>
+                    </div>
+                    <div class="ai-difficulty" id="aiDifficulty" style="display: none;">
+                        <button class="difficulty-btn" onclick="game.setAIDifficulty(1)">Easy</button>
+                        <button class="difficulty-btn active" onclick="game.setAIDifficulty(2)">Medium</button>
+                        <button class="difficulty-btn" onclick="game.setAIDifficulty(3)">Hard</button>
+                    </div>
+                    <div id="turnIndicator" class="turn-indicator white">White's Turn</div>
+                    <div id="gameStatus" class="status normal">Game in Progress</div>
+                    <div id="thinkingIndicator" class="thinking-indicator">AI is thinking...</div>
+                </div>
 
-            <div class="panel">
-                <h3>Move History</h3>
-                <div id="moveHistory" class="move-history"></div>
-            </div>
+                <div class="panel">
+                    <h3>Score</h3>
+                    <div class="score-display">
+                        <div>White: <span id="whiteScore">0</span></div>
+                        <div>Black: <span id="blackScore">0</span></div>
+                    </div>
+                </div>
 
-            <div class="panel">
-                <h3>Controls</h3>
-                <div class="controls">
-                    <button onclick="game.resetGame()">New Game</button>
-                    <button onclick="game.undoMove()">Undo Move</button>
+                <div class="panel">
+                    <h3>Captured Pieces</h3>
+                    <div>
+                        <p style="margin-bottom: 5px; font-size: 14px;">By White:</p>
+                        <div id="capturedByWhite" class="captured-pieces"></div>
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <p style="margin-bottom: 5px; font-size: 14px;">By Black:</p>
+                        <div id="capturedByBlack" class="captured-pieces"></div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>Move History</h3>
+                    <div id="moveHistory" class="move-history"></div>
+                </div>
+
+                <div class="panel">
+                    <h3>Controls</h3>
+                    <div class="controls">
+                        <button onclick="game.resetGame()">New Game</button>
+                        <button onclick="game.undoMove()">Undo Move</button>
+                        <button onclick="game.flipBoard()">Flip Board</button>
+                        <button onclick="game.toggleAnalysis()">Analysis</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -304,6 +570,7 @@
                 this.color = color;
                 this.position = position;
                 this.hasMoved = false;
+                this.element = null;
             }
 
             getSymbol() {
@@ -320,10 +587,324 @@
                 return symbols[this.color][this.type];
             }
 
+            getValue() {
+                const values = {
+                    pawn: 1, knight: 3, bishop: 3, rook: 5, queen: 9, king: 1000
+                };
+                return values[this.type];
+            }
+
             copy() {
-                const piece = new Piece(this.type, this.color, this.position);
+                const piece = new Piece(this.type, this.color, [...this.position]);
                 piece.hasMoved = this.hasMoved;
                 return piece;
+            }
+        }
+
+        class SimpleChessAI {
+            constructor(difficulty = 2) {
+                this.difficulty = difficulty;
+                this.pieceValues = {
+                    pawn: 1, knight: 3, bishop: 3, rook: 5, queen: 9, king: 1000
+                };
+            }
+
+            evaluateBoard(board, game) {
+                let score = 0;
+                
+                for (let row = 0; row < 8; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        const piece = board[row][col];
+                        if (piece) {
+                            const value = this.pieceValues[piece.type];
+                            const positionBonus = this.getPositionBonus(piece, row, col);
+                            const totalValue = value + positionBonus;
+                            
+                            if (piece.color === 'black') {
+                                score += totalValue;
+                            } else {
+                                score -= totalValue;
+                            }
+                        }
+                    }
+                }
+                
+                // Add mobility bonus
+                score += this.getMobilityBonus(board, 'black') * 0.1;
+                score -= this.getMobilityBonus(board, 'white') * 0.1;
+                
+                return score;
+            }
+
+            getPositionBonus(piece, row, col) {
+                const centerControl = [
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0.1, 0.1, 0.1, 0.1, 0, 0],
+                    [0, 0, 0.1, 0.2, 0.2, 0.1, 0, 0],
+                    [0, 0, 0.1, 0.2, 0.2, 0.1, 0, 0],
+                    [0, 0, 0.1, 0.1, 0.1, 0.1, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0]
+                ];
+
+                if (piece.type === 'pawn') {
+                    const pawnTable = piece.color === 'black' ? [
+                        [0, 0, 0, 0, 0, 0, 0, 0],
+                        [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+                        [0.1, 0.1, 0.2, 0.3, 0.3, 0.2, 0.1, 0.1],
+                        [0.05, 0.05, 0.1, 0.25, 0.25, 0.1, 0.05, 0.05],
+                        [0, 0, 0, 0.2, 0.2, 0, 0, 0],
+                        [0.05, -0.05, -0.1, 0, 0, -0.1, -0.05, 0.05],
+                        [0.05, 0.1, 0.1, -0.2, -0.2, 0.1, 0.1, 0.05],
+                        [0, 0, 0, 0, 0, 0, 0, 0]
+                    ] : [
+                        [0, 0, 0, 0, 0, 0, 0, 0],
+                        [0.05, 0.1, 0.1, -0.2, -0.2, 0.1, 0.1, 0.05],
+                        [0.05, -0.05, -0.1, 0, 0, -0.1, -0.05, 0.05],
+                        [0, 0, 0, 0.2, 0.2, 0, 0, 0],
+                        [0.05, 0.05, 0.1, 0.25, 0.25, 0.1, 0.05, 0.05],
+                        [0.1, 0.1, 0.2, 0.3, 0.3, 0.2, 0.1, 0.1],
+                        [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+                        [0, 0, 0, 0, 0, 0, 0, 0]
+                    ];
+                    return pawnTable[row][col];
+                }
+                
+                return centerControl[row][col];
+            }
+
+            getMobilityBonus(board, color) {
+                let mobility = 0;
+                for (let row = 0; row < 8; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        const piece = board[row][col];
+                        if (piece && piece.color === color) {
+                            mobility += this.getBasicMovesForPiece(piece, board).length;
+                        }
+                    }
+                }
+                return mobility;
+            }
+
+            getBasicMovesForPiece(piece, board) {
+                const moves = [];
+                const [row, col] = piece.position;
+
+                switch (piece.type) {
+                    case 'pawn':
+                        const direction = piece.color === 'white' ? -1 : 1;
+                        const startRow = piece.color === 'white' ? 6 : 1;
+                        
+                        // Move forward
+                        if (this.isInBounds(row + direction, col) && !board[row + direction][col]) {
+                            moves.push([row + direction, col]);
+                            if (row === startRow && !board[row + 2 * direction][col]) {
+                                moves.push([row + 2 * direction, col]);
+                            }
+                        }
+                        
+                        // Capture
+                        for (const dcol of [-1, 1]) {
+                            const newRow = row + direction;
+                            const newCol = col + dcol;
+                            if (this.isInBounds(newRow, newCol)) {
+                                const target = board[newRow][newCol];
+                                if (target && target.color !== piece.color) {
+                                    moves.push([newRow, newCol]);
+                                }
+                            }
+                        }
+                        break;
+
+                    case 'knight':
+                        const knightMoves = [
+                            [-2, -1], [-2, 1], [-1, -2], [-1, 2],
+                            [1, -2], [1, 2], [2, -1], [2, 1]
+                        ];
+                        for (const [dr, dc] of knightMoves) {
+                            const newRow = row + dr;
+                            const newCol = col + dc;
+                            if (this.isInBounds(newRow, newCol)) {
+                                const target = board[newRow][newCol];
+                                if (!target || target.color !== piece.color) {
+                                    moves.push([newRow, newCol]);
+                                }
+                            }
+                        }
+                        break;
+
+                    case 'bishop':
+                        this.addLineMoves(moves, piece, board, [-1, -1], [-1, 1], [1, -1], [1, 1]);
+                        break;
+
+                    case 'rook':
+                        this.addLineMoves(moves, piece, board, [-1, 0], [1, 0], [0, -1], [0, 1]);
+                        break;
+
+                    case 'queen':
+                        this.addLineMoves(moves, piece, board, 
+                            [-1, -1], [-1, 0], [-1, 1],
+                            [0, -1], [0, 1],
+                            [1, -1], [1, 0], [1, 1]
+                        );
+                        break;
+
+                    case 'king':
+                        for (let dr = -1; dr <= 1; dr++) {
+                            for (let dc = -1; dc <= 1; dc++) {
+                                if (dr === 0 && dc === 0) continue;
+                                const newRow = row + dr;
+                                const newCol = col + dc;
+                                if (this.isInBounds(newRow, newCol)) {
+                                    const target = board[newRow][newCol];
+                                    if (!target || target.color !== piece.color) {
+                                        moves.push([newRow, newCol]);
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                }
+                return moves;
+            }
+
+            addLineMoves(moves, piece, board, ...directions) {
+                const [row, col] = piece.position;
+                
+                for (const [dr, dc] of directions) {
+                    for (let i = 1; i < 8; i++) {
+                        const newRow = row + dr * i;
+                        const newCol = col + dc * i;
+                        
+                        if (!this.isInBounds(newRow, newCol)) break;
+                        
+                        const target = board[newRow][newCol];
+                        if (!target) {
+                            moves.push([newRow, newCol]);
+                        } else {
+                            if (target.color !== piece.color) {
+                                moves.push([newRow, newCol]);
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+
+            isInBounds(row, col) {
+                return row >= 0 && row < 8 && col >= 0 && col < 8;
+            }
+
+            getAllValidMoves(board, color, game) {
+                const moves = [];
+                
+                for (let row = 0; row < 8; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        const piece = board[row][col];
+                        if (piece && piece.color === color) {
+                            const basicMoves = this.getBasicMovesForPiece(piece, board);
+                            for (const move of basicMoves) {
+                                if (game.isMoveSafeForAI(piece, move, board)) {
+                                    moves.push({
+                                        from: [...piece.position],
+                                        to: move,
+                                        piece: piece,
+                                        value: this.getMoveValue(piece, move, board)
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                return moves;
+            }
+
+            getMoveValue(piece, to, board) {
+                const target = board[to[0]][to[1]];
+                let value = 0;
+                
+                if (target) {
+                    value = target.getValue() * 10;
+                }
+                
+                // Center control bonus
+                const centerDistance = Math.abs(3.5 - to[0]) + Math.abs(3.5 - to[1]);
+                value += (7 - centerDistance) * 0.1;
+                
+                return value;
+            }
+
+            getBestMove(game) {
+                const moves = this.getAllValidMoves(game.board, 'black', game);
+                
+                if (moves.length === 0) return null;
+                
+                // Sort moves by basic value
+                moves.sort((a, b) => b.value - a.value);
+                
+                // Evaluate top moves based on difficulty
+                const depth = this.difficulty;
+                const topMoves = moves.slice(0, Math.min(5 + depth * 2, moves.length));
+                
+                let bestMove = topMoves[0];
+                let bestScore = -Infinity;
+                
+                for (const move of topMoves) {
+                    const score = this.evaluateMove(move, game, depth);
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMove = move;
+                    }
+                }
+                
+                // Add some randomness for easier difficulties
+                if (this.difficulty === 1 && Math.random() < 0.3) {
+                    return moves[Math.floor(Math.random() * Math.min(10, moves.length))];
+                }
+                
+                return bestMove;
+            }
+
+            evaluateMove(move, game, depth) {
+                const newBoard = this.simulateMove(game.board, move);
+                const score = this.evaluateBoard(newBoard, game);
+                
+                if (depth <= 1) return score;
+                
+                // Simple opponent response
+                const opponentMoves = this.getAllValidMoves(newBoard, 'white', game);
+                if (opponentMoves.length === 0) return score + 1000;
+                
+                let minOpponentScore = Infinity;
+                const sampleSize = Math.min(3, opponentMoves.length);
+                
+                for (let i = 0; i < sampleSize; i++) {
+                    const opponentMove = opponentMoves[i];
+                    const opponentBoard = this.simulateMove(newBoard, opponentMove);
+                    const opponentScore = this.evaluateBoard(opponentBoard, game);
+                    minOpponentScore = Math.min(minOpponentScore, opponentScore);
+                }
+                
+                return score - minOpponentScore * 0.5;
+            }
+
+            simulateMove(board, move) {
+                const newBoard = board.map(row => [...row.map(p => p ? p.copy() : null)]);
+                const [fromRow, fromCol] = move.from;
+                const [toRow, toCol] = move.to;
+                
+                const piece = newBoard[fromRow][fromCol];
+                newBoard[toRow][toCol] = piece;
+                newBoard[fromRow][fromCol] = null;
+                
+                if (piece) {
+                    piece.position = [toRow, toCol];
+                    piece.hasMoved = true;
+                }
+                
+                return newBoard;
             }
         }
 
@@ -331,7 +912,15 @@
             constructor() {
                 this.canvas = document.getElementById('chessboard');
                 this.ctx = this.canvas.getContext('2d');
-                this.squareSize = 80;
+                this.piecesContainer = document.getElementById('piecesContainer');
+                this.dragOverlay = document.getElementById('dragOverlay');
+                
+                this.isMobile = window.innerWidth <= 799;
+                this.squareSize = this.calculateSquareSize();
+                
+                this.canvas.width = this.squareSize * 8;
+                this.canvas.height = this.squareSize * 8;
+                
                 this.board = [];
                 this.currentTurn = 'white';
                 this.selectedPiece = null;
@@ -344,82 +933,291 @@
                 this.checkmate = false;
                 this.stalemate = false;
                 this.promotionPending = null;
+                this.gameMode = 'pvp';
+                this.ai = new SimpleChessAI(2);
+                this.isFlipped = false;
+                this.isDragging = false;
+                this.dragPiece = null;
+                this.dragOffset = { x: 0, y: 0 };
+                this.originalPosition = null;
                 
                 this.initializeBoard();
                 this.setupEventListeners();
                 this.draw();
+                this.createPieceElements();
+            }
+
+            calculateSquareSize() {
+                const maxWidth = this.isMobile ? window.innerWidth - 40 : window.innerHeight - 200;
+                const maxHeight = this.isMobile ? window.innerHeight - 300 : window.innerHeight - 200;
+                const maxBoardSize = Math.min(maxWidth, maxHeight, 640);
+                return Math.floor(maxBoardSize / 8);
             }
 
             initializeBoard() {
-                // Initialize empty board
-                for (let row = 0; row < 8; row++) {
-                    this.board[row] = [];
-                    for (let col = 0; col < 8; col++) {
-                        this.board[row][col] = null;
-                    }
-                }
-
-                // Place pieces
+                this.board = Array(8).fill(null).map(() => Array(8).fill(null));
+                
                 const pieceOrder = ['rook', 'knight', 'bishop', 'queen', 'king', 'bishop', 'knight', 'rook'];
                 
-                // Black pieces
                 for (let col = 0; col < 8; col++) {
                     this.board[0][col] = new Piece(pieceOrder[col], 'black', [0, col]);
                     this.board[1][col] = new Piece('pawn', 'black', [1, col]);
-                }
-                
-                // White pieces
-                for (let col = 0; col < 8; col++) {
                     this.board[7][col] = new Piece(pieceOrder[col], 'white', [7, col]);
                     this.board[6][col] = new Piece('pawn', 'white', [6, col]);
                 }
             }
 
-            setupEventListeners() {
-                this.canvas.addEventListener('click', (e) => this.handleClick(e));
+            createPieceElements() {
+                this.piecesContainer.innerHTML = '';
+                
+                for (let row = 0; row < 8; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        const piece = this.board[row][col];
+                        if (piece) {
+                            this.createPieceElement(piece);
+                        }
+                    }
+                }
             }
 
-            handleClick(event) {
+            createPieceElement(piece) {
+                const element = document.createElement('div');
+                element.className = 'piece';
+                element.textContent = piece.getSymbol();
+                element.style.fontSize = `${this.squareSize * 0.7}px`;
+                element.style.color = piece.color === 'white' ? '#ffffff' : '#000000';
+                element.style.textShadow = piece.color === 'white' ? '1px 1px 2px black' : '1px 1px 2px white';
+                element.style.width = `${this.squareSize}px`;
+                element.style.height = `${this.squareSize}px`;
+                element.style.lineHeight = `${this.squareSize}px`;
+                element.style.textAlign = 'center';
+                element.style.pointerEvents = 'auto';
+                
+                this.updatePiecePosition(piece, element);
+                
+                element.addEventListener('mousedown', (e) => this.handleMouseDown(e, piece));
+                element.addEventListener('touchstart', (e) => this.handleTouchStart(e, piece), { passive: false });
+                
+                this.piecesContainer.appendChild(element);
+                piece.element = element;
+            }
+
+            updatePiecePosition(piece, element = piece.element, animate = false) {
+                if (!element) return;
+                
+                const [row, col] = piece.position;
+                const displayRow = this.isFlipped ? 7 - row : row;
+                const displayCol = this.isFlipped ? 7 - col : col;
+                
+                if (animate) {
+                    element.classList.add('animating');
+                }
+                
+                element.style.left = `${displayCol * this.squareSize}px`;
+                element.style.top = `${displayRow * this.squareSize}px`;
+                
+                if (animate) {
+                    setTimeout(() => {
+                        element.classList.remove('animating');
+                    }, 300);
+                }
+            }
+
+            setupEventListeners() {
+                // Mouse events
+                document.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+                document.addEventListener('mouseup', (e) => this.handleMouseUp(e));
+                
+                // Touch events
+                document.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
+                document.addEventListener('touchend', (e) => this.handleTouchEnd(e), { passive: false });
+                
+                // Prevent context menu on long press
+                this.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+                
+                // Window resize
+                window.addEventListener('resize', () => {
+                    this.handleResize();
+                });
+            }
+
+            handleResize() {
+                const newIsMobile = window.innerWidth <= 799;
+                const newSquareSize = this.calculateSquareSize();
+                
+                if (newIsMobile !== this.isMobile || newSquareSize !== this.squareSize) {
+                    this.isMobile = newIsMobile;
+                    this.squareSize = newSquareSize;
+                    this.canvas.width = this.squareSize * 8;
+                    this.canvas.height = this.squareSize * 8;
+                    this.createPieceElements();
+                    this.draw();
+                }
+            }
+
+            handleMouseDown(e, piece) {
                 if (this.checkmate || this.stalemate) return;
+                if (this.gameMode === 'ai' && this.currentTurn === 'black') return;
+                if (piece.color !== this.currentTurn) return;
+                
+                e.preventDefault();
+                this.startDragging(piece, e.clientX, e.clientY);
+            }
+
+            handleTouchStart(e, piece) {
+                if (this.checkmate || this.stalemate) return;
+                if (this.gameMode === 'ai' && this.currentTurn === 'black') return;
+                if (piece.color !== this.currentTurn) return;
+                
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const touch = e.touches[0];
+                this.startDragging(piece, touch.clientX, touch.clientY);
+            }
+
+            startDragging(piece, clientX, clientY) {
+                this.isDragging = true;
+                this.dragPiece = piece;
+                this.selectedPiece = piece;
                 
                 const rect = this.canvas.getBoundingClientRect();
-                const x = event.clientX - rect.left;
-                const y = event.clientY - rect.top;
+                this.dragOffset.x = clientX - rect.left;
+                this.dragOffset.y = clientY - rect.top;
+                
+                this.originalPosition = {
+                    left: piece.element.style.left,
+                    top: piece.element.style.top
+                };
+                
+                piece.element.classList.add('dragging');
+                piece.element.style.pointerEvents = 'none';
+                
+                this.validMoves = this.getValidMoves(piece);
+                this.highlightValidMoves();
+                
+                // Enable drag overlay to prevent scrolling
+                this.dragOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            handleMouseMove(e) {
+                if (!this.isDragging || !this.dragPiece) return;
+                
+                e.preventDefault();
+                this.updateDragPosition(e.clientX, e.clientY);
+            }
+
+            handleTouchMove(e) {
+                if (!this.isDragging || !this.dragPiece) return;
+                
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const touch = e.touches[0];
+                this.updateDragPosition(touch.clientX, touch.clientY);
+            }
+
+            updateDragPosition(clientX, clientY) {
+                const rect = this.canvas.getBoundingClientRect();
+                const x = clientX - rect.left - this.dragOffset.x + this.squareSize / 2;
+                const y = clientY - rect.top - this.dragOffset.y + this.squareSize / 2;
+                
+                this.dragPiece.element.style.left = `${x}px`;
+                this.dragPiece.element.style.top = `${y}px`;
+            }
+
+            handleMouseUp(e) {
+                if (!this.isDragging || !this.dragPiece) return;
+                
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                this.finishDragging(x, y);
+            }
+
+            handleTouchEnd(e) {
+                if (!this.isDragging || !this.dragPiece) return;
+                
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const touch = e.changedTouches[0];
+                const rect = this.canvas.getBoundingClientRect();
+                const x = touch.clientX - rect.left;
+                const y = touch.clientY - rect.top;
+                
+                this.finishDragging(x, y);
+            }
+
+            finishDragging(x, y) {
                 const col = Math.floor(x / this.squareSize);
                 const row = Math.floor(y / this.squareSize);
-
-                if (row < 0 || row >= 8 || col < 0 || col >= 8) return;
-
-                const clickedPiece = this.board[row][col];
-
-                if (this.selectedPiece) {
-                    // Try to move
-                    if (this.validMoves.some(move => move[0] === row && move[1] === col)) {
-                        this.makeMove(this.selectedPiece.position, [row, col]);
-                    } else if (clickedPiece && clickedPiece.color === this.currentTurn) {
-                        // Select new piece
-                        this.selectedPiece = clickedPiece;
-                        this.validMoves = this.getValidMoves(clickedPiece);
-                    } else {
-                        // Deselect
-                        this.selectedPiece = null;
-                        this.validMoves = [];
-                    }
-                } else if (clickedPiece && clickedPiece.color === this.currentTurn) {
-                    // Select piece
-                    this.selectedPiece = clickedPiece;
-                    this.validMoves = this.getValidMoves(clickedPiece);
+                
+                const actualRow = this.isFlipped ? 7 - row : row;
+                const actualCol = this.isFlipped ? 7 - col : col;
+                
+                // Disable drag overlay
+                this.dragOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+                
+                if (this.isInBounds(actualRow, actualCol) && 
+                    this.validMoves.some(move => move[0] === actualRow && move[1] === actualCol)) {
+                    this.makeMove(this.dragPiece.position, [actualRow, actualCol]);
+                } else {
+                    // Animate back to original position
+                    this.dragPiece.element.classList.remove('dragging');
+                    this.dragPiece.element.classList.add('animating');
+                    this.dragPiece.element.style.left = this.originalPosition.left;
+                    this.dragPiece.element.style.top = this.originalPosition.top;
+                    
+                    setTimeout(() => {
+                        this.dragPiece.element.classList.remove('animating');
+                    }, 300);
                 }
+                
+                this.dragPiece.element.style.pointerEvents = 'auto';
+                this.isDragging = false;
+                this.dragPiece = null;
+                this.clearHighlights();
+            }
 
-                this.draw();
+            highlightValidMoves() {
+                this.clearHighlights();
+                
+                for (const [row, col] of this.validMoves) {
+                    const displayRow = this.isFlipped ? 7 - row : row;
+                    const displayCol = this.isFlipped ? 7 - col : col;
+                    
+                    const highlight = document.createElement('div');
+                    if (this.board[row][col]) {
+                        highlight.className = 'capture-move';
+                        highlight.style.width = `${this.squareSize}px`;
+                        highlight.style.height = `${this.squareSize}px`;
+                        highlight.style.left = `${displayCol * this.squareSize}px`;
+                        highlight.style.top = `${displayRow * this.squareSize}px`;
+                    } else {
+                        highlight.className = 'valid-move';
+                        highlight.style.left = `${displayCol * this.squareSize + this.squareSize / 2 - 10}px`;
+                        highlight.style.top = `${displayRow * this.squareSize + this.squareSize / 2 - 10}px`;
+                    }
+                    
+                    this.piecesContainer.appendChild(highlight);
+                }
+            }
+
+            clearHighlights() {
+                const highlights = this.piecesContainer.querySelectorAll('.valid-move, .capture-move');
+                highlights.forEach(h => h.remove());
             }
 
             getValidMoves(piece) {
-                const moves = this.getBasicMoves(piece);
+                const moves = this.getBasicMovesForPiece(piece);
                 return moves.filter(move => this.isMoveSafe(piece, move));
             }
 
-            getBasicMoves(piece) {
+            getBasicMovesForPiece(piece) {
                 const moves = [];
                 const [row, col] = piece.position;
 
@@ -432,13 +1230,12 @@
                         if (this.isInBounds(row + direction, col) && !this.board[row + direction][col]) {
                             moves.push([row + direction, col]);
                             
-                            // Double move from start
                             if (row === startRow && !this.board[row + 2 * direction][col]) {
                                 moves.push([row + 2 * direction, col]);
                             }
                         }
                         
-                        // Capture diagonally
+                        // Capture
                         for (const dcol of [-1, 1]) {
                             const newRow = row + direction;
                             const newCol = col + dcol;
@@ -453,7 +1250,7 @@
                         // En passant
                         if (this.enPassantTarget) {
                             const [enRow, enCol] = this.enPassantTarget;
-                            if (Math.abs(enCol - col) === 1 && newRow === enRow) {
+                            if (Math.abs(enCol - col) === 1 && row + direction === enRow) {
                                 moves.push([enRow, enCol]);
                             }
                         }
@@ -477,15 +1274,15 @@
                         break;
 
                     case 'bishop':
-                        this.addLineMoves(moves, piece, [-1, -1], [-1, 1], [1, -1], [1, 1]);
+                        this.addLineMoves(moves, [-1, -1], [-1, 1], [1, -1], [1, 1]);
                         break;
 
                     case 'rook':
-                        this.addLineMoves(moves, piece, [-1, 0], [1, 0], [0, -1], [0, 1]);
+                        this.addLineMoves(moves, [-1, 0], [1, 0], [0, -1], [0, 1]);
                         break;
 
                     case 'queen':
-                        this.addLineMoves(moves, piece, 
+                        this.addLineMoves(moves, 
                             [-1, -1], [-1, 0], [-1, 1],
                             [0, -1], [0, 1],
                             [1, -1], [1, 0], [1, 1]
@@ -509,24 +1306,11 @@
                         
                         // Castling
                         if (!piece.hasMoved && !this.inCheck) {
-                            // King-side
-                            const rook = this.board[row][7];
-                            if (rook && rook.type === 'rook' && !rook.hasMoved) {
-                                if (!this.board[row][5] && !this.board[row][6]) {
-                                    if (!this.isSquareAttacked([row, 5], piece.color)) {
-                                        moves.push([row, 6]);
-                                    }
-                                }
+                            if (this.canCastle(piece, true)) {
+                                moves.push([row, 6]);
                             }
-                            
-                            // Queen-side
-                            const qRook = this.board[row][0];
-                            if (qRook && qRook.type === 'rook' && !qRook.hasMoved) {
-                                if (!this.board[row][1] && !this.board[row][2] && !this.board[row][3]) {
-                                    if (!this.isSquareAttacked([row, 3], piece.color)) {
-                                        moves.push([row, 2]);
-                                    }
-                                }
+                            if (this.canCastle(piece, false)) {
+                                moves.push([row, 2]);
                             }
                         }
                         break;
@@ -535,8 +1319,8 @@
                 return moves;
             }
 
-            addLineMoves(moves, piece, ...directions) {
-                const [row, col] = piece.position;
+            addLineMoves(moves, ...directions) {
+                const [row, col] = this.selectedPiece.position;
                 
                 for (const [dr, dc] of directions) {
                     for (let i = 1; i < 8; i++) {
@@ -549,7 +1333,7 @@
                         if (!target) {
                             moves.push([newRow, newCol]);
                         } else {
-                            if (target.color !== piece.color) {
+                            if (target.color !== this.selectedPiece.color) {
                                 moves.push([newRow, newCol]);
                             }
                             break;
@@ -558,37 +1342,56 @@
                 }
             }
 
+            canCastle(king, kingSide) {
+                const row = king.position[0];
+                const rookCol = kingSide ? 7 : 0;
+                const rook = this.board[row][rookCol];
+                
+                if (!rook || rook.type !== 'rook' || rook.hasMoved) return false;
+                
+                const startCol = kingSide ? 5 : 3;
+                const endCol = kingSide ? 6 : 2;
+                
+                for (let col = startCol; col <= endCol; col++) {
+                    if (this.board[row][col]) return false;
+                    if (this.isSquareAttacked([row, col], king.color)) return false;
+                }
+                
+                return true;
+            }
+
             isInBounds(row, col) {
                 return row >= 0 && row < 8 && col >= 0 && col < 8;
             }
 
             isMoveSafe(piece, move) {
-                // Simulate move
+                return this.isMoveSafeForAI(piece, move, this.board);
+            }
+
+            isMoveSafeForAI(piece, move, board) {
                 const [fromRow, fromCol] = piece.position;
                 const [toRow, toCol] = move;
-                const capturedPiece = this.board[toRow][toCol];
+                const capturedPiece = board[toRow][toCol];
                 
-                this.board[toRow][toCol] = piece;
-                this.board[fromRow][fromCol] = null;
+                board[toRow][toCol] = piece;
+                board[fromRow][fromCol] = null;
                 const oldPos = piece.position;
                 piece.position = move;
                 
-                // Check if king is safe
-                const kingPos = this.findKing(piece.color);
-                const isSafe = !this.isSquareAttacked(kingPos, piece.color);
+                const kingPos = this.findKing(piece.color, board);
+                const isSafe = !this.isSquareAttacked(kingPos, piece.color, board);
                 
-                // Undo move
-                this.board[fromRow][fromCol] = piece;
-                this.board[toRow][toCol] = capturedPiece;
+                board[fromRow][fromCol] = piece;
+                board[toRow][toCol] = capturedPiece;
                 piece.position = oldPos;
                 
                 return isSafe;
             }
 
-            findKing(color) {
+            findKing(color, board = this.board) {
                 for (let row = 0; row < 8; row++) {
                     for (let col = 0; col < 8; col++) {
-                        const piece = this.board[row][col];
+                        const piece = board[row][col];
                         if (piece && piece.type === 'king' && piece.color === color) {
                             return [row, col];
                         }
@@ -597,14 +1400,14 @@
                 return null;
             }
 
-            isSquareAttacked(position, defendingColor) {
+            isSquareAttacked(position, defendingColor, board = this.board) {
                 const attackingColor = defendingColor === 'white' ? 'black' : 'white';
                 
                 for (let row = 0; row < 8; row++) {
                     for (let col = 0; col < 8; col++) {
-                        const piece = this.board[row][col];
+                        const piece = board[row][col];
                         if (piece && piece.color === attackingColor) {
-                            if (this.canPieceAttack(piece, position)) {
+                            if (this.canPieceAttack(piece, position, board)) {
                                 return true;
                             }
                         }
@@ -613,7 +1416,7 @@
                 return false;
             }
 
-            canPieceAttack(piece, targetPos) {
+            canPieceAttack(piece, targetPos, board = this.board) {
                 const [row, col] = piece.position;
                 const [targetRow, targetCol] = targetPos;
 
@@ -628,16 +1431,16 @@
                     
                     case 'bishop':
                         if (Math.abs(targetRow - row) !== Math.abs(targetCol - col)) return false;
-                        return this.isPathClear(row, col, targetRow, targetCol);
+                        return this.isPathClear(row, col, targetRow, targetCol, board);
                     
                     case 'rook':
                         if (targetRow !== row && targetCol !== col) return false;
-                        return this.isPathClear(row, col, targetRow, targetCol);
+                        return this.isPathClear(row, col, targetRow, targetCol, board);
                     
                     case 'queen':
                         if (targetRow !== row && targetCol !== col && 
                             Math.abs(targetRow - row) !== Math.abs(targetCol - col)) return false;
-                        return this.isPathClear(row, col, targetRow, targetCol);
+                        return this.isPathClear(row, col, targetRow, targetCol, board);
                     
                     case 'king':
                         return Math.abs(targetRow - row) <= 1 && Math.abs(targetCol - col) <= 1;
@@ -647,7 +1450,7 @@
                 }
             }
 
-            isPathClear(fromRow, fromCol, toRow, toCol) {
+            isPathClear(fromRow, fromCol, toRow, toCol, board) {
                 const dr = toRow === fromRow ? 0 : (toRow > fromRow ? 1 : -1);
                 const dc = toCol === fromCol ? 0 : (toCol > fromCol ? 1 : -1);
                 
@@ -655,7 +1458,7 @@
                 let currentCol = fromCol + dc;
                 
                 while (currentRow !== toRow || currentCol !== toCol) {
-                    if (this.board[currentRow][currentCol]) return false;
+                    if (board[currentRow][currentCol]) return false;
                     currentRow += dr;
                     currentCol += dc;
                 }
@@ -663,7 +1466,7 @@
                 return true;
             }
 
-            makeMove(from, to) {
+            makeMove(from, to, isAI = false) {
                 const [fromRow, fromCol] = from;
                 const [toRow, toCol] = to;
                 const piece = this.board[fromRow][fromCol];
@@ -684,19 +1487,15 @@
                 let isCastling = false;
                 if (piece.type === 'king' && Math.abs(toCol - fromCol) === 2) {
                     isCastling = true;
-                    if (toCol === 6) { // King-side
-                        const rook = this.board[fromRow][7];
-                        this.board[fromRow][5] = rook;
-                        this.board[fromRow][7] = null;
-                        rook.position = [fromRow, 5];
-                        rook.hasMoved = true;
-                    } else { // Queen-side
-                        const rook = this.board[fromRow][0];
-                        this.board[fromRow][3] = rook;
-                        this.board[fromRow][0] = null;
-                        rook.position = [fromRow, 3];
-                        rook.hasMoved = true;
-                    }
+                    const rookFromCol = toCol > fromCol ? 7 : 0;
+                    const rookToCol = toCol > fromCol ? 5 : 3;
+                    const rook = this.board[fromRow][rookFromCol];
+                    
+                    this.board[fromRow][rookToCol] = rook;
+                    this.board[fromRow][rookFromCol] = null;
+                    rook.position = [fromRow, rookToCol];
+                    rook.hasMoved = true;
+                    this.updatePiecePosition(rook, rook.element, true);
                 }
 
                 // Update en passant target
@@ -705,22 +1504,27 @@
                     this.enPassantTarget = [(fromRow + toRow) / 2, fromCol];
                 }
 
-                // Handle pawn promotion
-                if (piece.type === 'pawn' && (toRow === 0 || toRow === 7)) {
-                    this.promotionPending = { from, to, piece };
-                    document.getElementById('promotionDialog').classList.add('active');
-                    return;
-                }
-
                 // Make the move
                 this.board[toRow][toCol] = piece;
                 this.board[fromRow][fromCol] = null;
                 piece.position = [toRow, toCol];
                 piece.hasMoved = true;
 
-                // Record captured pieces
+                // Animate the piece
+                this.updatePiecePosition(piece, piece.element, true);
+
+                // Handle capture
                 if (capturedPiece) {
                     this.capturedPieces[piece.color].push(capturedPiece);
+                    if (capturedPiece.element) {
+                        capturedPiece.element.style.transform = 'scale(0) rotate(360deg)';
+                        capturedPiece.element.style.opacity = '0';
+                        setTimeout(() => {
+                            if (capturedPiece.element) {
+                                capturedPiece.element.remove();
+                            }
+                        }, 300);
+                    }
                 }
 
                 // Record move
@@ -730,64 +1534,95 @@
                 });
                 this.lastMove = { from, to };
 
-                // Switch turns
+                // Handle pawn promotion
+                if (piece.type === 'pawn' && (toRow === 0 || toRow === 7)) {
+                    if (isAI) {
+                        this.selectPromotion('queen');
+                    } else {
+                        this.promotionPending = { from, to, piece };
+                        document.getElementById('promotionDialog').classList.add('active');
+                        return;
+                    }
+                }
+
+                this.finishTurn();
+            }
+
+            selectPromotion(pieceType) {
+                if (!this.promotionPending) {
+                    // AI promotion
+                    const [fromRow, fromCol] = this.lastMove.from;
+                    const [toRow, toCol] = this.lastMove.to;
+                    const piece = this.board[toRow][toCol];
+                    
+                    const promotedPiece = new Piece(pieceType, piece.color, [toRow, toCol]);
+                    promotedPiece.hasMoved = true;
+                    
+                    this.board[toRow][toCol] = promotedPiece;
+                    
+                    if (piece.element) {
+                        piece.element.remove();
+                    }
+                    this.createPieceElement(promotedPiece);
+                } else {
+                    const { from, to, piece } = this.promotionPending;
+                    const [fromRow, fromCol] = from;
+                    const [toRow, toCol] = to;
+                    
+                    const promotedPiece = new Piece(pieceType, piece.color, [toRow, toCol]);
+                    promotedPiece.hasMoved = true;
+                    
+                    this.board[toRow][toCol] = promotedPiece;
+                    
+                    if (piece.element) {
+                        piece.element.remove();
+                    }
+                    this.createPieceElement(promotedPiece);
+                    
+                    document.getElementById('promotionDialog').classList.remove('active');
+                    this.promotionPending = null;
+                }
+                
+                this.finishTurn();
+            }
+
+            finishTurn() {
                 this.currentTurn = this.currentTurn === 'white' ? 'black' : 'white';
                 this.selectedPiece = null;
                 this.validMoves = [];
 
-                // Update game state
                 this.updateGameState();
                 this.updateUI();
+                
+                // AI move
+                if (this.gameMode === 'ai' && this.currentTurn === 'black' && !this.checkmate && !this.stalemate) {
+                    setTimeout(() => this.makeAIMove(), 500);
+                }
             }
 
-            selectPromotion(pieceType) {
-                const { from, to, piece } = this.promotionPending;
-                const [fromRow, fromCol] = from;
-                const [toRow, toCol] = to;
-                const capturedPiece = this.board[toRow][toCol];
-
-                // Create promoted piece
-                const promotedPiece = new Piece(pieceType, piece.color, [toRow, toCol]);
-                promotedPiece.hasMoved = true;
-
-                // Make the move
-                this.board[toRow][toCol] = promotedPiece;
-                this.board[fromRow][fromCol] = null;
-
-                // Record captured pieces
-                if (capturedPiece) {
-                    this.capturedPieces[piece.color].push(capturedPiece);
-                }
-
-                // Record move
-                this.moveHistory.push({
-                    from, to, piece: promotedPiece, captured: capturedPiece,
-                    promotion: true
-                });
-                this.lastMove = { from, to };
-
-                // Clean up
-                this.promotionPending = null;
-                document.getElementById('promotionDialog').classList.remove('active');
-
-                // Switch turns
-                this.currentTurn = this.currentTurn === 'white' ? 'black' : 'white';
-
-                // Update game state
-                this.updateGameState();
-                this.updateUI();
-                this.draw();
+            makeAIMove() {
+                document.getElementById('thinkingIndicator').classList.add('active');
+                
+                setTimeout(() => {
+                    try {
+                        const move = this.ai.getBestMove(this);
+                        if (move) {
+                            this.makeMove(move.from, move.to, true);
+                        }
+                    } catch (error) {
+                        console.error('AI move error:', error);
+                    }
+                    document.getElementById('thinkingIndicator').classList.remove('active');
+                }, 100);
             }
 
             updateGameState() {
-                // Check if current player is in check
                 this.inCheck = false;
                 const kingPos = this.findKing(this.currentTurn);
                 if (kingPos && this.isSquareAttacked(kingPos, this.currentTurn)) {
                     this.inCheck = true;
                 }
 
-                // Check for checkmate or stalemate
                 let hasValidMoves = false;
                 for (let row = 0; row < 8; row++) {
                     for (let col = 0; col < 8; col++) {
@@ -812,12 +1647,10 @@
             }
 
             updateUI() {
-                // Update turn indicator
                 const turnIndicator = document.getElementById('turnIndicator');
                 turnIndicator.textContent = this.currentTurn === 'white' ? "White's Turn" : "Black's Turn";
                 turnIndicator.className = `turn-indicator ${this.currentTurn}`;
 
-                // Update status
                 const status = document.getElementById('gameStatus');
                 if (this.checkmate) {
                     const winner = this.currentTurn === 'white' ? 'Black' : 'White';
@@ -840,10 +1673,16 @@
                 document.getElementById('capturedByBlack').innerHTML = 
                     this.capturedPieces.black.map(p => p.getSymbol()).join(' ');
 
+                // Update scores
+                const whiteScore = this.capturedPieces.white.reduce((sum, p) => sum + p.getValue(), 0);
+                const blackScore = this.capturedPieces.black.reduce((sum, p) => sum + p.getValue(), 0);
+                document.getElementById('whiteScore').textContent = whiteScore;
+                document.getElementById('blackScore').textContent = blackScore;
+
                 // Update move history
                 const historyDiv = document.getElementById('moveHistory');
-                historyDiv.innerHTML = this.moveHistory.slice(-10).map((move, i) => {
-                    const moveNum = this.moveHistory.length - 10 + i + 1;
+                historyDiv.innerHTML = this.moveHistory.slice(-15).map((move, i) => {
+                    const moveNum = this.moveHistory.length - 15 + i + 1;
                     const fromFile = String.fromCharCode(97 + move.from[1]);
                     const fromRank = 8 - move.from[0];
                     const toFile = String.fromCharCode(97 + move.to[1]);
@@ -855,7 +1694,6 @@
             }
 
             draw() {
-                // Clear canvas
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
                 // Draw board
@@ -873,28 +1711,16 @@
                     this.ctx.fillStyle = 'rgba(255, 255, 0, 0.3)';
                     const [fromRow, fromCol] = this.lastMove.from;
                     const [toRow, toCol] = this.lastMove.to;
-                    this.ctx.fillRect(fromCol * this.squareSize, fromRow * this.squareSize, 
+                    
+                    const displayFromRow = this.isFlipped ? 7 - fromRow : fromRow;
+                    const displayFromCol = this.isFlipped ? 7 - fromCol : fromCol;
+                    const displayToRow = this.isFlipped ? 7 - toRow : toRow;
+                    const displayToCol = this.isFlipped ? 7 - toCol : toCol;
+                    
+                    this.ctx.fillRect(displayFromCol * this.squareSize, displayFromRow * this.squareSize, 
                                      this.squareSize, this.squareSize);
-                    this.ctx.fillRect(toCol * this.squareSize, toRow * this.squareSize, 
+                    this.ctx.fillRect(displayToCol * this.squareSize, displayToRow * this.squareSize, 
                                      this.squareSize, this.squareSize);
-                }
-
-                // Highlight selected piece
-                if (this.selectedPiece) {
-                    this.ctx.fillStyle = 'rgba(255, 255, 0, 0.5)';
-                    const [row, col] = this.selectedPiece.position;
-                    this.ctx.fillRect(col * this.squareSize, row * this.squareSize, 
-                                     this.squareSize, this.squareSize);
-                }
-
-                // Show valid moves
-                this.ctx.fillStyle = 'rgba(0, 255, 0, 0.3)';
-                for (const [row, col] of this.validMoves) {
-                    this.ctx.beginPath();
-                    this.ctx.arc(col * this.squareSize + this.squareSize / 2,
-                                row * this.squareSize + this.squareSize / 2,
-                                15, 0, 2 * Math.PI);
-                    this.ctx.fill();
                 }
 
                 // Highlight king in check
@@ -903,47 +1729,58 @@
                     const kingPos = this.findKing(this.currentTurn);
                     if (kingPos) {
                         const [row, col] = kingPos;
-                        this.ctx.fillRect(col * this.squareSize, row * this.squareSize, 
+                        const displayRow = this.isFlipped ? 7 - row : row;
+                        const displayCol = this.isFlipped ? 7 - col : col;
+                        this.ctx.fillRect(displayCol * this.squareSize, displayRow * this.squareSize, 
                                          this.squareSize, this.squareSize);
                     }
                 }
 
-                // Draw pieces
-                this.ctx.font = '60px Arial';
+                // Draw coordinates
+                this.ctx.fillStyle = '#666';
+                this.ctx.font = `${this.squareSize * 0.15}px Arial`;
                 this.ctx.textAlign = 'center';
                 this.ctx.textBaseline = 'middle';
                 
-                for (let row = 0; row < 8; row++) {
-                    for (let col = 0; col < 8; col++) {
-                        const piece = this.board[row][col];
-                        if (piece) {
-                            this.ctx.fillStyle = piece.color === 'white' ? '#ffffff' : '#000000';
-                            this.ctx.strokeStyle = piece.color === 'white' ? '#000000' : '#ffffff';
-                            this.ctx.lineWidth = 2;
-                            
-                            const x = col * this.squareSize + this.squareSize / 2;
-                            const y = row * this.squareSize + this.squareSize / 2;
-                            
-                            this.ctx.strokeText(piece.getSymbol(), x, y);
-                            this.ctx.fillText(piece.getSymbol(), x, y);
-                        }
-                    }
-                }
-
-                // Draw coordinates
-                this.ctx.font = '12px Arial';
-                this.ctx.fillStyle = '#666';
-                this.ctx.textAlign = 'left';
-                this.ctx.textBaseline = 'top';
-                
                 for (let i = 0; i < 8; i++) {
-                    // Rank numbers
-                    this.ctx.fillText(8 - i, 2, i * this.squareSize + 2);
-                    // File letters
+                    const displayRow = this.isFlipped ? i : 7 - i;
+                    this.ctx.fillText(8 - i, 10, i * this.squareSize + this.squareSize / 2);
                     this.ctx.fillText(String.fromCharCode(97 + i), 
-                                     i * this.squareSize + this.squareSize - 12, 
-                                     this.canvas.height - 15);
+                                     i * this.squareSize + this.squareSize / 2, 
+                                     this.canvas.height - 10);
                 }
+            }
+
+            setGameMode(mode) {
+                this.gameMode = mode;
+                document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+                event.target.classList.add('active');
+                
+                const aiDifficulty = document.getElementById('aiDifficulty');
+                if (mode === 'ai') {
+                    aiDifficulty.style.display = 'flex';
+                } else {
+                    aiDifficulty.style.display = 'none';
+                }
+                
+                this.resetGame();
+            }
+
+            setAIDifficulty(level) {
+                this.ai = new SimpleChessAI(level);
+                document.querySelectorAll('.difficulty-btn').forEach(btn => btn.classList.remove('active'));
+                event.target.classList.add('active');
+            }
+
+            flipBoard() {
+                this.isFlipped = !this.isFlipped;
+                this.createPieceElements();
+                this.draw();
+            }
+
+            toggleAnalysis() {
+                // Placeholder for analysis mode
+                alert('Analysis mode coming soon!');
             }
 
             resetGame() {
@@ -961,6 +1798,7 @@
                 this.promotionPending = null;
                 
                 this.initializeBoard();
+                this.createPieceElements();
                 this.updateUI();
                 this.draw();
             }
@@ -968,33 +1806,45 @@
             undoMove() {
                 if (this.moveHistory.length === 0) return;
                 
-                // Simple undo: reset and replay all moves except the last one
-                const movesToKeep = this.moveHistory.slice(0, -1);
-                this.resetGame();
+                const lastMove = this.moveHistory.pop();
+                const [fromRow, fromCol] = lastMove.from;
+                const [toRow, toCol] = lastMove.to;
                 
-                // Temporarily disable UI updates during replay
-                const originalUpdateUI = this.updateUI.bind(this);
-                this.updateUI = () => {};
+                // Restore piece positions
+                const piece = this.board[toRow][toCol];
+                this.board[fromRow][fromCol] = piece;
+                this.board[toRow][toCol] = lastMove.captured;
                 
-                for (const move of movesToKeep) {
-                    // Replay move without triggering full game logic
-                    const [fromRow, fromCol] = move.from;
-                    const [toRow, toCol] = move.to;
-                    const piece = this.board[fromRow][fromCol];
-                    
-                    if (piece) {
-                        this.board[toRow][toCol] = piece;
-                        this.board[fromRow][fromCol] = null;
-                        piece.position = [toRow, toCol];
-                        piece.hasMoved = true;
-                        
-                        this.currentTurn = this.currentTurn === 'white' ? 'black' : 'white';
-                        this.lastMove = { from: move.from, to: move.to };
-                    }
+                if (piece) {
+                    piece.position = [fromRow, fromCol];
+                    piece.hasMoved = false;
+                    this.updatePiecePosition(piece, piece.element, true);
                 }
                 
-                // Restore UI updates
-                this.updateUI = originalUpdateUI;
+                if (lastMove.captured) {
+                    this.capturedPieces[lastMove.piece.color].pop();
+                    this.createPieceElement(lastMove.captured);
+                }
+                
+                // Handle castling undo
+                if (lastMove.isCastling) {
+                    const rookFromCol = toCol > fromCol ? 5 : 3;
+                    const rookToCol = toCol > fromCol ? 7 : 0;
+                    const rook = this.board[fromRow][rookFromCol];
+                    
+                    this.board[fromRow][rookToCol] = rook;
+                    this.board[fromRow][rookFromCol] = null;
+                    rook.position = [fromRow, rookToCol];
+                    rook.hasMoved = false;
+                    this.updatePiecePosition(rook, rook.element, true);
+                }
+                
+                // Update last move
+                this.lastMove = this.moveHistory.length > 0 ? 
+                    { from: this.moveHistory[this.moveHistory.length - 1].from,
+                      to: this.moveHistory[this.moveHistory.length - 1].to } : null;
+                
+                this.currentTurn = this.currentTurn === 'white' ? 'black' : 'white';
                 this.updateGameState();
                 this.updateUI();
                 this.draw();
